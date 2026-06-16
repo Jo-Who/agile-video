@@ -84,27 +84,36 @@ async function main() {
   // alte m4a entfernen, damit kein Mischmasch entsteht
   fs.readdirSync(OUT).filter(f => /\.m4a$/.test(f)).forEach(f => fs.unlinkSync(path.join(OUT, f)));
 
+  async function render(text, who, outName) {
+    const voiceId = resolved[who];
+    const vs = SETTINGS[who] || SETTINGS._default;
+    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`, {
+      method: "POST",
+      headers: { "xi-api-key": KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text.replace(/\s+/g, " ").trim(), model_id: MODEL, voice_settings: { ...vs, use_speaker_boost: true } })
+    });
+    if (!r.ok) { console.log(`  ✗ ${outName}: ${r.status} ${(await r.text()).slice(0, 120)}`); return false; }
+    fs.writeFileSync(path.join(OUT, `${outName}.mp3`), Buffer.from(await r.arrayBuffer()));
+    await new Promise(rr => setTimeout(rr, 250)); // sanftes Rate-Limit
+    return true;
+  }
+
   const ids = [];
   let made = 0;
   for (let i = 0; i < SCRIPT.length; i++) {
     const b = SCRIPT[i];
     const c = CHARACTERS[b.who];
     if (!c || c.kind === "system") continue;
-    const voiceId = resolved[b.who];
-    const vs = SETTINGS[b.who] || SETTINGS._default;
-    const text = b.text.replace(/\s+/g, " ").trim();
-
-    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`, {
-      method: "POST",
-      headers: { "xi-api-key": KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ text, model_id: MODEL, voice_settings: { ...vs, use_speaker_boost: true } })
-    });
-    if (!r.ok) { console.log(`  ✗ [${i}] ${c.name}: ${r.status} ${(await r.text()).slice(0,120)}`); continue; }
-    const buf = Buffer.from(await r.arrayBuffer());
-    fs.writeFileSync(path.join(OUT, `${i}.mp3`), buf);
-    ids.push(i); made++;
-    process.stdout.write(`  ✓ [${i}] ${c.name.padEnd(14)} ${text.slice(0, 46)}\n`);
-    await new Promise(r => setTimeout(r, 250)); // sanftes Rate-Limit
+    if (await render(b.text, b.who, `${i}`)) {
+      ids.push(i); made++;
+      process.stdout.write(`  ✓ [${i}] ${c.name.padEnd(14)} ${b.text.replace(/\s+/g,' ').slice(0, 44)}\n`);
+    }
+    if (b.quiz) {
+      await render(b.quiz.okText, b.quiz.okWho, `${i}_ok`);
+      await render(b.quiz.noText, b.quiz.noWho, `${i}_no`);
+      made += 2;
+      process.stdout.write(`     ↳ Quiz-Feedback  ${i}_ok (${CHARACTERS[b.quiz.okWho].name}) · ${i}_no (${CHARACTERS[b.quiz.noWho].name})\n`);
+    }
   }
 
   fs.writeFileSync(path.join(OUT, "manifest.json"), JSON.stringify({ format: "mp3", ids }, null, 0));

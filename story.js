@@ -44,8 +44,10 @@
       who: "narrator",
       text: "Eine wahre Geschichte. Über vier Studierende, ein Projekt am Abgrund – und ein Wort, das alles veränderte." },
     { who: "narrator", text: "Heute, in unserer Reportage: die Akte Agile." },
-    { who: "narrator", text: "Die Namen wurden geändert. Die Deadlines leider nicht." },
-    { who: "narrator", text: "Es beginnt, wie so oft, im ganz normalen Wahnsinn." },
+    { who: "narrator", text: "Die Namen sind echt. Die Deadlines leider auch." },
+    { statement: true, who: "narrator",
+      text: "Wo seht ihr konkrete Einsatzmöglichkeiten von Agile im Studium und im Job?" },
+    { who: "narrator", text: "Das ist unsere Leitfrage. Und sie beginnt, wie so oft, im ganz normalen Wahnsinn." },
 
     // ===== AKT 2 — VORHER · KLASSISCH ===========================
     { act: "DOK · GRUPPE D", title: "", label: "VORHER · KLASSISCH",
@@ -139,6 +141,36 @@
     { stage: { chars: ["jonas", "david", "inas", "marianne"], props: [{ e: "💼" }, { e: "🎓" }], place: "" },
       who: "narrator",
       text: "Eine Haltung, die im Hörsaal beginnt – und im Berufsleben bleibt." },
+
+    // ===== ZWISCHENSPIEL — MITMACHEN (interaktiv) ===============
+    { act: "DOK · GRUPPE D", title: "", label: "MITMACHEN · DEINE RUNDE",
+      theme: { bg1: "#1a1530", bg2: "#2b2150", accent: "#fbbf24" }, rec: true,
+      stage: { chars: ["jonas", "inas", "david", "marianne"], props: [{ e: "❓" }, { e: "🧠" }], place: "QUIZ · BIST DU AGIL?" },
+      who: "narrator",
+      text: "Kleiner Test – hast du aufgepasst? Was ist eigentlich ein Sprint?",
+      quiz: {
+        options: [
+          "Eine kurze Etappe mit einem fertigen Ergebnis",
+          "Ein hundert Seiten dicker Plan ganz am Anfang",
+          "Die durchgemachte Nacht vor der Abgabe"
+        ],
+        correct: 0,
+        okWho: "inas",  okText: "Genau! Klein, fertig, wiederholbar.",
+        noWho: "jonas", noText: "Ähm, nein – das war noch klassisch gedacht. Probier's nochmal!"
+      } },
+    { who: "narrator",
+      text: "Und die grosse Frage: Wo lässt sich Agilität einsetzen?",
+      quiz: {
+        options: [
+          "Nur in der Software-Entwicklung",
+          "Im Studium und in fast jedem Job",
+          "Eigentlich nirgends so richtig"
+        ],
+        correct: 1,
+        okWho: "dozentin", okText: "Richtig. Genau darum ging es die ganze Zeit.",
+        noWho: "david",    noText: "Nicht ganz – denk an Marketing, Events, Verwaltung. Nochmal!"
+      } },
+    { who: "narrator", text: "Stark. Dann hast du das Wichtigste mitgenommen." },
 
     // ===== AKT 6 — OUTRO ========================================
     { act: "DOK · GRUPPE D", title: "", label: "ENDE DER REPORTAGE",
