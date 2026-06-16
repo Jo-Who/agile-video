@@ -20,6 +20,8 @@ const OUT = path.join(ROOT, "assets", "voice");
 const { CHARACTERS, SCRIPT } = require(path.join(ROOT, "story.js"));
 
 fs.mkdirSync(OUT, { recursive: true });
+// evtl. vorhandene MP3 (ElevenLabs) entfernen, damit kein Formate-Mix entsteht
+fs.readdirSync(OUT).filter(f => /\.mp3$/.test(f)).forEach(f => fs.unlinkSync(path.join(OUT, f)));
 
 const ids = [];
 let made = 0, skipped = 0;

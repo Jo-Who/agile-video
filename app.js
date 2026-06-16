@@ -159,6 +159,7 @@ function typeText(el, text, durationMs) {
    ============================================================ */
 let voiceMode = "speech";     // wird beim Start gesetzt: 'file' | 'speech' | 'silent'
 let fileIds = new Set();
+let voiceFormat = "m4a";      // aus manifest.json (z.B. "mp3" bei ElevenLabs)
 const synth = window.speechSynthesis;
 let synthVoices = [];
 function loadVoices() { synthVoices = synth ? synth.getVoices() : []; }
@@ -181,6 +182,7 @@ async function detectVoiceFiles() {
     if (!r.ok) return false;
     const m = await r.json();
     fileIds = new Set(m.ids || []);
+    voiceFormat = m.format || "m4a";
     return fileIds.size > 0;
   } catch (e) { return false; }
 }
@@ -270,7 +272,7 @@ function playBeat(i) {
   }
 
   if (useFile) {
-    const a = new Audio(`assets/voice/${i}.m4a`);
+    const a = new Audio(`assets/voice/${i}.${voiceFormat}`);
     curAudio = a;
     duck(true);
     let typed = false;

@@ -5,6 +5,8 @@
   "description": "DIE AKTE AGILE — cinematische Mini-Doku über Agilität im Studium und Job (Gruppe D)",
   "scripts": {
     "voices": "node tools/gen-voices.js",
+    "voices:11": "node tools/gen-voices-elevenlabs.js",
+    "voices:list": "node tools/gen-voices-elevenlabs.js --list",
     "serve": "python3 -m http.server 4321"
   }
 }

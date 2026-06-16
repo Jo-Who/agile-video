@@ -41,7 +41,19 @@ Erzeugt wurden sie auf einem **Mac** mit den eingebauten Stimmen (`say`):
 | Dozentin Z. M. | Anna |
 | Der Chef | Grandpa |
 
-**Neu rendern** (nach Textänderungen, nur auf macOS):
+### 🌟 Natürliche Stimmen (empfohlen): ElevenLabs
+Die Mac-Stimmen klingen etwas robotisch. Für **richtig natürliche** Stimmen (wie in
+professionellen Videos) rendern wir dieselben Zeilen über ElevenLabs — das ganze Skript
+(~3'000 Zeichen) passt in den **kostenlosen** Tarif:
+```bash
+# 1) Gratis-Account auf elevenlabs.io → Profile → API Key kopieren
+# 2) im Projektordner:
+ELEVENLABS_API_KEY=dein_key npm run voices:11
+```
+Jede Figur bekommt automatisch eine eigene Stimme (Zuordnung in
+`tools/gen-voices-elevenlabs.js`). Stimmen deines Accounts anzeigen: `npm run voices:list`.
+
+**Mac-Stimmen neu rendern** (kostenlos, ohne Account; nach Textänderungen):
 ```bash
 npm run voices
 ```
