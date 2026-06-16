@@ -25,13 +25,13 @@ const MODEL = process.env.ELEVENLABS_MODEL || "eleven_multilingual_v2";
 // Wunsch-Stimme pro Figur (Name muss in deinem ElevenLabs-Account sein).
 // Findet er den Namen nicht, verteilt das Script automatisch andere Stimmen.
 const VOICE_MAP = {
-  narrator: "George",     // ruhig, dokumentarisch
-  jonas:    "Liam",
-  david:    "Callum",
-  inas:     "Alice",
-  marianne: "Lily",
-  dozentin: "Charlotte",
-  chef:     "Brian"
+  narrator: "George",     // Warm, Captivating Storyteller — dokumentarisch
+  jonas:    "Liam",       // Energetic
+  david:    "Callum",     // Husky
+  inas:     "Alice",      // Clear, Engaging Educator
+  marianne: "Lily",       // Velvety Actress
+  dozentin: "Matilda",    // Knowledgable, Professional
+  chef:     "Adam"        // Dominant, Firm
 };
 
 // pro Figur etwas Charakter über die Voice-Settings
@@ -53,7 +53,15 @@ async function main() {
     process.exit(1);
   }
   const voices = await listVoices();
-  const byName = new Map(voices.map(v => [v.name.toLowerCase(), v.id]));
+  // Namen wie "George - Warm, Storyteller" → per Präfix matchen
+  const findByName = want => {
+    want = (want || "").toLowerCase().trim();
+    if (!want) return null;
+    const hit = voices.find(v => v.name.toLowerCase().split(" - ")[0].trim() === want)
+             || voices.find(v => v.name.toLowerCase().startsWith(want));
+    return hit ? hit.id : null;
+  };
+  const byName = { get: findByName, has: w => !!findByName(w) };
 
   if (process.argv.includes("--list")) {
     console.log("Stimmen in deinem Account:\n" + voices.map(v => "  • " + v.name).join("\n"));
