@@ -672,8 +672,10 @@ async function start() {
   }
   if (voiceMode === "speech") { try { synth.cancel(); } catch (e) {} }
 
+  // Kino-Balken fahren rein, dann startet die Reportage
+  document.body.classList.add("cinema");
   startTimecode();
-  playBeat(0);
+  setTimeout(() => { if (started) playBeat(0); }, 700);
 }
 
 function updateVoiceBtn() {

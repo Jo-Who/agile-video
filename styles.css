@@ -21,9 +21,12 @@ body{
 #progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:80;
   background:linear-gradient(90deg,var(--accent),#fff);transition:width .4s linear;opacity:.85;}
 
-/* letterbox bars */
-.bar{position:fixed;left:0;right:0;height:var(--bar);background:#000;z-index:60;pointer-events:none;}
+/* letterbox bars — fahren beim Start ins Bild (Kino-Feeling) */
+.bar{position:fixed;left:0;right:0;height:0;background:#000;z-index:60;pointer-events:none;
+  box-shadow:0 0 24px 6px rgba(0,0,0,.6);
+  transition:height .9s cubic-bezier(.76,0,.24,1);}
 .bar.top{top:0;} .bar.bottom{bottom:0;}
+body.cinema .bar{height:var(--bar);}
 
 /* ---------- layout ---------- */
 #app{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
