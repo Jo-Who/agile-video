@@ -14,7 +14,7 @@ const CONFIG = {
   rate: 0.92,      // Sprechtempo (0.9–1.0 wirkt natürlich; kleiner = längeres Video)
   pitch: 1.0,
   // Outro / Credits — hier eure Namen & euren Link eintragen:
-  authors: "Ein Projekt von [Name] · [Name] · [Name]",
+  authors: "Gruppe D · David Egeler · Marianne Wiederkehr · Inas Kassem · Jonas Russi",
   course: "Agile Methoden",
   ctaText: null,   // z.B. "Mehr erfahren" — oder null = ausblenden
   ctaUrl: "#"
