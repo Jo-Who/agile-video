@@ -543,20 +543,20 @@ function bubbleXFor(stage, who) {
   return Math.max(26, Math.min(74, x));
 }
 
-// Schwänzchen der Sprechblase exakt auf die sprechende Figur richten
+// Schwänzchen der Sprechblase auf die sprechende Figur richten.
+// Breitenunabhängig: relativ zur Blasenmitte + fixer Versatz für Randfiguren,
+// damit es beim Tippen (wachsende Blase) NICHT mitwandert.
 function placeTail(stage, who) {
+  const bub = elBubble.querySelector(".bubble");
+  if (!bub) return;
   const pos = POS[stage.chars.length] || POS[5];
   const k = stage.chars.indexOf(who);
-  const spct = (pos[k] && pos[k][0]) || 50;
-  requestAnimationFrame(() => {
-    const bub = elBubble.querySelector(".bubble");
-    if (!bub) return;
-    const sr = elScreen.getBoundingClientRect(), br = bub.getBoundingClientRect();
-    const spx = sr.left + sr.width * spct / 100;
-    let tx = spx - br.left;
-    tx = Math.max(20, Math.min(br.width - 20, tx));
-    bub.style.setProperty("--tailx", tx + "px");
-  });
+  const spct = (pos[k] && pos[k][0]) || 50;       // echte Figurenposition
+  const clamped = bubbleXFor(stage, who);          // Blasen-Mittelpunkt (geklammert)
+  const sw = elScreen.getBoundingClientRect().width || 1;
+  let delta = (spct - clamped) / 100 * sw;          // Abstand Figur ↔ Blasenmitte in px
+  delta = Math.max(-150, Math.min(150, delta));
+  bub.style.setProperty("--tailx", `calc(50% + ${delta}px)`);
 }
 
 /* Score-Ducking (prozeduraler WebAudio-Score; optionale MP3) */
