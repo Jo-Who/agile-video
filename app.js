@@ -1,472 +1,340 @@
 /* ============================================================
-   Agile · animierte Story
-   ------------------------------------------------------------
-   Selbstständige Web-Story mit KI-Voiceover (Web Speech API).
-   Keine persönlichen Aufnahmen, kein externer Dienst nötig.
-
-   ► Inhalte anpassen:  unten in CONFIG und SCENES.
-   ► Tempo der Stimme:  CONFIG.rate  (kleiner = langsamer/länger).
-   ► Eigene Studio-Stimme statt Browser-TTS:  siehe README.md
+   DIE AKTE AGILE — cinematische Engine
+   Drehbuch & Besetzung stehen in story.js
    ============================================================ */
-
-const CONFIG = {
-  lang: "de-DE",
-  rate: 0.92,      // Sprechtempo (0.9–1.0 wirkt natürlich; kleiner = längeres Video)
-  pitch: 1.0,
-  // Outro / Credits — hier eure Namen & euren Link eintragen:
-  authors: "Gruppe D · David Egeler · Marianne Wiederkehr · Inas Kassem · Jonas Russi",
-  course: "Agile Methoden",
-  ctaText: null,   // z.B. "Mehr erfahren" — oder null = ausblenden
-  ctaUrl: "#"
+const CFG = {
+  typeMin: 18,        // ms pro Zeichen (Untergrenze)
+  gapAfter: 850,      // Pause nach einer Zeile vor dem Weiterschalten (ms)
+  speechRate: 1.0,
+  musicVol: 0.17
 };
 
-/* ------------------------------------------------------------
-   SCENES — jede Szene hat: bg-Farben, kicker, headline, art (HTML)
-   und lines[] (gesprochen + als Untertitel angezeigt).
-   In art[]: Elemente mit data-step="N" erscheinen, sobald die
-   N-te Zeile der Szene gesprochen wird (0-basiert).
-   ------------------------------------------------------------ */
-const SCENES = [
-  {
-    id: "intro",
-    bg: ["#1a1148", "#2a1a6e"],
-    kicker: CONFIG.course,
-    headline: 'Ein Wort, das dein <em>Studium</em> und deinen <em>Job</em> verändert.',
-    art: `<div class="hero pop">⚡</div>`,
-    lines: [
-      "Stell dir vor, ein einziges Wort macht dein Studium und deinen Job spürbar entspannter.",
-      "Dieses Wort heisst: agil.",
-      "Agilität klingt erst mal nach einem schicken Büro-Buzzword.",
-      "Aber dahinter steckt eine richtig simple und mächtige Idee.",
-      "In den nächsten Minuten zeigen wir dir, wo sie dir ganz konkret weiterhilft.",
-      "Egal ob im Hörsaal, im Gruppenprojekt oder im Büro – das Prinzip bleibt gleich."
-    ]
-  },
-  {
-    id: "chaos",
-    bg: ["#3a0d18", "#5b1224"],
-    kicker: "Kommt dir das bekannt vor?",
-    headline: "Alles auf den letzten Drücker.",
-    art: `
-      <div class="stage-person">
-        <div class="me">😰</div>
-        <div class="orbit reveal" data-step="3" style="top:4%;left:14%">📚</div>
-        <div class="orbit reveal" data-step="3" style="top:10%;right:12%">☕</div>
-        <div class="orbit reveal" data-step="3" style="bottom:14%;left:8%">🌙</div>
-        <div class="orbit reveal" data-step="3" style="bottom:8%;right:14%">⏰</div>
-        <div class="orbit reveal" data-step="5" style="top:42%;right:2%">💥</div>
-        <div class="orbit reveal" data-step="4" style="top:46%;left:0%">❓</div>
-      </div>`,
-    lines: [
-      "Das hier ist Lena. Sie studiert – und arbeitet nebenbei in einem Betrieb.",
-      "Ihr grosses Semesterprojekt läuft so ab: Drei Monate lang passiert fast nichts.",
-      "Und dann, kurz vor der Abgabe, soll plötzlich alles auf einmal fertig sein.",
-      "Die Nacht davor: Chaos, kalter Kaffee und ganz viel Panik.",
-      "Niemand im Team weiss so richtig, wer gerade was macht.",
-      "Und das erste echte Feedback kommt erst ganz am Schluss – wenn es zu spät ist.",
-      "Genau so fühlt sich starres, klassisches Planen oft an.",
-      "Vielleicht kennst du dieses Gefühl ja aus deinem eigenen Studium."
-    ]
-  },
-  {
-    id: "shift",
-    bg: ["#0b2545", "#13315c"],
-    kicker: "Es geht auch anders",
-    headline: 'Weniger Stress. <em>Mehr Überblick.</em>',
-    art: `
-      <div class="field">
-        <span class="e">🌫️</span>
-        <span class="e reveal" data-step="1" style="font-size:1.4em">➡️</span>
-        <span class="e reveal" data-step="2" style="font-size:1.4em">💡</span>
-      </div>`,
-    lines: [
-      "Aber geht das nicht auch anders? Ruhiger, klarer, mit weniger Stress?",
-      "Doch. Und der Weg dahin hat einen Namen.",
-      "Genau hier kommt Agilität ins Spiel."
-    ]
-  },
-  {
-    id: "what",
-    bg: ["#13243f", "#1d3a66"],
-    kicker: "Was heisst eigentlich agil?",
-    headline: "Klein liefern statt gross scheitern.",
-    art: `
-      <div class="versus">
-        <div class="vside bad">
-          <div class="vt">❌ Klassisch</div>
-          <div class="vrow">📦</div>
-          <div class="vcap">Ein riesiges Paket — ganz am Ende.</div>
-        </div>
-        <div class="vside good reveal" data-step="1">
-          <div class="vt">✅ Agil</div>
-          <div class="vrow">📦📦📦</div>
-          <div class="vcap">Viele kleine Ergebnisse — Schritt für Schritt.</div>
-        </div>
-      </div>`,
-    lines: [
-      "Agil zu arbeiten heisst: nicht alles auf einmal durchplanen.",
-      "Sondern in kleinen, überschaubaren Schritten vorgehen.",
-      "Statt einem riesigen Wurf ganz am Ende lieferst du regelmässig kleine Ergebnisse.",
-      "Nach jedem Schritt holst du dir Feedback und passt deinen Plan an.",
-      "Im Zentrum stehen Menschen, Zusammenarbeit und echte Resultate.",
-      "Nicht dicke Konzepte, die in der Schublade verstauben.",
-      "Kurz gesagt: lieber oft etwas Kleines fertig, als selten etwas Grosses."
-    ]
-  },
-  {
-    id: "loop",
-    bg: ["#0e2a2a", "#10403c"],
-    kicker: "Das Herzstück",
-    headline: "Ein einfacher Kreislauf.",
-    art: `
-      <div class="loop">
-        <div class="ring"></div>
-        <div class="core">inspect<br>&amp; adapt</div>
-        <div class="node n0 reveal" data-step="1"><span class="ni">📝</span><span class="nt">Planen</span></div>
-        <div class="node n1 reveal" data-step="1"><span class="ni">🔨</span><span class="nt">Machen</span></div>
-        <div class="node n2 reveal" data-step="1"><span class="ni">🔍</span><span class="nt">Prüfen</span></div>
-        <div class="node n3 reveal" data-step="1"><span class="ni">🔄</span><span class="nt">Anpassen</span></div>
-      </div>`,
-    lines: [
-      "Im Kern ist Agilität ein einfacher Kreislauf.",
-      "Planen. Machen. Prüfen. Anpassen. Und wieder von vorn.",
-      "Fachleute nennen das: inspect and adapt – beobachten und verbessern.",
-      "So wird aus einem Fehler schnell eine kleine Lektion.",
-      "Und keine grosse Katastrophe kurz vor der Deadline.",
-      "Genau dieser Rhythmus nimmt enorm viel Druck raus."
-    ]
-  },
-  {
-    id: "studyboard",
-    bg: ["#2a1d4e", "#3a2670"],
-    kicker: "Agile im Studium · Teil 1",
-    headline: "Das Gruppenprojekt als Board.",
-    art: `
-      <div class="kanban">
-        <div class="col todo"><h4>To Do</h4>
-          <div class="note reveal" data-step="1">Recherche</div>
-          <div class="note reveal" data-step="1">Folien bauen</div>
-          <div class="note reveal" data-step="2">Bericht schreiben</div>
-        </div>
-        <div class="col doing"><h4>In Arbeit</h4>
-          <div class="note reveal" data-step="3">Konzept</div>
-          <div class="note reveal" data-step="4">Prototyp</div>
-        </div>
-        <div class="col done"><h4>Fertig ✅</h4>
-          <div class="note green reveal" data-step="3">Thema gewählt</div>
-          <div class="note green reveal" data-step="4">Aufgaben verteilt</div>
-        </div>
-      </div>`,
-    lines: [
-      "Schauen wir, wie Lena das jetzt in ihrem Gruppenprojekt nutzt.",
-      "Zuerst sammelt das Team alle Aufgaben an einem Ort – das nennt man Backlog.",
-      "Dann teilt es die Arbeit in kurze Etappen auf: sogenannte Sprints, meist ein bis zwei Wochen.",
-      "Auf einem Board wandert jede Aufgabe von „To Do“ über „In Arbeit“ zu „Fertig“.",
-      "Mit einem Blick sieht jeder: Wer macht was – und wie weit sind wir wirklich?",
-      "Kein Versteckspiel mehr und keine bösen Überraschungen.",
-      "Plötzlich fühlt sich das Projekt nicht mehr nach einem Berg an, sondern nach machbaren Päckchen."
-    ]
-  },
-  {
-    id: "studyretro",
-    bg: ["#1d2d50", "#264079"],
-    kicker: "Agile im Studium · Teil 2",
-    headline: "Kurz reden. Kurz lernen. Besser werden.",
-    art: `
-      <div class="field">
-        <span class="e">🗣️</span>
-        <span class="e reveal" data-step="2">👍</span>
-        <span class="e reveal" data-step="2">👎</span>
-        <span class="e reveal" data-step="2">💡</span>
-        <span class="e reveal" data-step="3">⏱️</span>
-      </div>`,
-    lines: [
-      "Einmal pro Woche trifft sich das Team für ein kurzes Standup.",
-      "Drei Fragen: Was lief gut? Wo hakt es? Was kommt als Nächstes?",
-      "Und am Ende jeder Etappe gibt es eine kurze Retrospektive: Was behalten wir, was verbessern wir?",
-      "Übrigens funktioniert das auch beim Lernen: feste Lern-Sprints mit Pausen schlagen jede durchgemachte Nacht.",
-      "So lernst du nicht nur den Stoff, sondern auch, wie ihr als Team besser werdet."
-    ]
-  },
-  {
-    id: "jobteam",
-    bg: ["#102a3c", "#15405c"],
-    kicker: "Agile im Job · Teil 1",
-    headline: "Im Beruf — dieselbe Idee, nur grösser.",
-    art: `
-      <div class="field">
-        <span class="e">👩‍💻</span>
-        <span class="e">👨‍💻</span>
-        <span class="e reveal" data-step="2" style="font-size:1.3em">🚀</span>
-        <span class="e reveal" data-step="3">🙋</span>
-        <span class="e reveal" data-step="3">💬</span>
-      </div>`,
-    lines: [
-      "Und im Job? Dort ist es genau dieselbe Idee – nur eine Nummer grösser.",
-      "Ein Team startet jeden Morgen mit einem kurzen Daily Standup.",
-      "Alle paar Wochen wird etwas Fertiges ausgeliefert und den Kunden gezeigt.",
-      "Statt einem riesigen Knall ganz am Ende gibt es früh ehrliches Feedback.",
-      "So merkt das Team schnell, ob es das Richtige baut – und entwickelt nicht am Bedarf vorbei.",
-      "Genau deshalb arbeiten heute unzählige Firmen mit Scrum oder Kanban."
-    ]
-  },
-  {
-    id: "jobbeyond",
-    bg: ["#27143f", "#3d1f63"],
-    kicker: "Agile im Job · Teil 2",
-    headline: "Längst nicht mehr nur für die IT.",
-    art: `
-      <div class="chips">
-        <span class="chip">📣 Marketing</span>
-        <span class="chip reveal" data-step="2">🎪 Events</span>
-        <span class="chip reveal" data-step="2">🔬 Forschung</span>
-        <span class="chip reveal" data-step="2">🏠 Alltag</span>
-        <span class="chip tool reveal" data-step="4">Trello</span>
-        <span class="chip tool reveal" data-step="4">Jira</span>
-        <span class="chip tool reveal" data-step="4">Notion</span>
-      </div>`,
-    lines: [
-      "Das Beste: Agilität ist längst nicht mehr nur etwas für die IT.",
-      "Marketing-Teams planen ihre Kampagnen heute in Sprints.",
-      "Eventplanung, Forschung und sogar dein eigener Alltag lassen sich agil organisieren.",
-      "Mit einem persönlichen Kanban-Board behältst du deine To-Dos im Griff.",
-      "Tools wie Trello, Jira oder Notion machen die Arbeit für alle sichtbar.",
-      "Agilität ist also keine Software – es ist eine Art zu denken.",
-      "Und wer einmal so arbeitet, will selten wieder zurück zum alten Chaos."
-    ]
-  },
-  {
-    id: "recap",
-    bg: ["#0d2030", "#123a4a"],
-    kicker: "Konkret für dich",
-    headline: "Das kannst du ab morgen ausprobieren.",
-    art: `
-      <div class="checklist">
-        <div class="check reveal" data-step="1"><span class="box"></span><span><span class="num">1.</span> Grosse Aufgaben in kleine Schritte zerlegen</span></div>
-        <div class="check reveal" data-step="2"><span class="box"></span><span><span class="num">2.</span> Ein Board nutzen, um den Überblick zu behalten</span></div>
-        <div class="check reveal" data-step="3"><span class="box"></span><span><span class="num">3.</span> In festen Etappen statt auf den letzten Drücker arbeiten</span></div>
-        <div class="check reveal" data-step="4"><span class="box"></span><span><span class="num">4.</span> Früh und regelmässig Feedback holen</span></div>
-        <div class="check reveal" data-step="5"><span class="box"></span><span><span class="num">5.</span> Kurz zurückschauen und stetig besser werden</span></div>
-      </div>`,
-    lines: [
-      "Fassen wir zusammen, was du ab morgen ausprobieren kannst.",
-      "Erstens: Zerlege grosse Aufgaben in kleine, machbare Schritte.",
-      "Zweitens: Nutze ein Board, um jederzeit den Überblick zu behalten.",
-      "Drittens: Arbeite in festen Etappen statt auf den letzten Drücker.",
-      "Viertens: Hol dir früh und regelmässig Feedback.",
-      "Und fünftens: Schau kurz zurück und werde mit jedem Mal ein bisschen besser."
-    ]
-  },
-  {
-    id: "outro",
-    bg: ["#1a1148", "#2a1a6e"],
-    kicker: "Zum Schluss",
-    headline: 'Agil ist kein Werkzeug. <em>Agil ist eine Haltung.</em>',
-    art: `<div class="hero">⚡</div>
-      <div class="credits reveal" data-step="2" id="credits"></div>`,
-    lines: [
-      "Agil ist kein Werkzeug. Agil ist eine Haltung.",
-      "Du musst nicht dein ganzes Leben auf einmal umkrempeln.",
-      "Fang einfach klein an – beim nächsten Projekt, im Studium oder im Job.",
-      "Und vielleicht wird deine nächste Deadline ja richtig entspannt.",
-      "Danke fürs Zuschauen."
-    ]
-  }
-];
+const { CHARACTERS, SCRIPT } = window.STORY;
 
-/* ============================================================
-   Build scene DOM
-   ============================================================ */
-const stage = document.getElementById("stage");
-const steps = []; // flattened: {si, li, text}
-
-SCENES.forEach((sc, si) => {
-  const el = document.createElement("section");
-  el.className = "scene";
-  el.id = "scene-" + sc.id;
-  el.dataset.si = si;
-  el.innerHTML = `
-    <div class="kicker">${sc.kicker || ""}</div>
-    <h2 class="headline display">${sc.headline || ""}</h2>
-    <div class="art">${sc.art || ""}</div>`;
-  stage.appendChild(el);
-  sc._el = el;
-  sc.lines.forEach((text, li) => steps.push({ si, li, text }));
-});
-
-// fill credits in outro
-const creditsEl = document.getElementById("credits");
-if (creditsEl) {
-  creditsEl.innerHTML =
-    `${CONFIG.authors}<br>${CONFIG.course}` +
-    (CONFIG.ctaText ? `<br><a class="cta" href="${CONFIG.ctaUrl}" target="_blank" rel="noopener">${CONFIG.ctaText} →</a>` : "");
-}
-
-/* ambient particles */
+/* ---- Beats aus dem Drehbuch ableiten (Zustand "vererbt" sich) ---- */
+const beats = [];
 (function () {
-  const amb = document.getElementById("ambient");
-  for (let i = 0; i < 36; i++) {
-    const d = document.createElement("div");
-    d.className = "dot";
-    d.style.left = Math.random() * 100 + "vw";
-    const dur = 9 + Math.random() * 12;
-    d.style.animationDuration = dur + "s";
-    d.style.animationDelay = -Math.random() * dur + "s";
-    const s = 2 + Math.random() * 5;
-    d.style.width = d.style.height = s + "px";
-    amb.appendChild(d);
-  }
+  let act = "", title = "", label = "", rec = true;
+  let theme = { bg1: "#0a0e16", bg2: "#141b26", accent: "#e7c987" };
+  let stage = { chars: [], props: [], place: "" };
+  SCRIPT.forEach((b, i) => {
+    if (b.act !== undefined) act = b.act;
+    const showTitle = b.title !== undefined && b.title !== "";
+    if (b.title !== undefined) title = b.title;
+    if (b.label !== undefined) label = b.label;
+    if (b.rec !== undefined) rec = b.rec;
+    if (b.theme) theme = b.theme;
+    if (b.stage) stage = b.stage;
+    beats.push({
+      i, who: b.who, text: b.text,
+      act, title: showTitle ? title : "", label, rec, theme, stage
+    });
+  });
 })();
 
 /* ============================================================
-   Voice (Web Speech API) with robust fallback timer
+   DOM aufbauen
    ============================================================ */
-const synth = window.speechSynthesis;
-let voices = [], voice = null, muted = false;
+const root = document.getElementById("app");
+root.innerHTML = `
+  <div class="bar top"></div>
+  <div class="bar bottom"></div>
 
-function pickVoice() {
-  voices = synth ? synth.getVoices() : [];
-  const de = voices.filter(v => /^de/i.test(v.lang));
-  // Prefer a natural-sounding German voice
-  voice =
-    de.find(v => /google/i.test(v.name)) ||
-    de.find(v => /(petra|anna|markus|helena|katja|conrad|premium|neural)/i.test(v.name)) ||
-    de[0] || null;
-  buildVoiceMenu(de);
-}
-function buildVoiceMenu(de) {
-  const sel = document.getElementById("voicePick");
-  if (!sel) return;
-  sel.innerHTML = "";
-  if (!de.length) { sel.hidden = true; return; }
-  de.forEach((v, i) => {
-    const o = document.createElement("option");
-    o.value = v.name; o.textContent = v.name.replace(/\(.*?\)/g, "").trim() || v.name;
-    if (voice && v.name === voice.name) o.selected = true;
-    sel.appendChild(o);
-  });
-  sel.onchange = () => { voice = de.find(v => v.name === sel.value) || voice; };
-}
-if (synth) {
-  pickVoice();
-  synth.onvoiceschanged = pickVoice;
+  <div id="screen">
+    <div class="scanlines"></div>
+    <div class="grain"></div>
+    <div class="vignette"></div>
+
+    <div class="chrome">
+      <div class="rec"><span class="recdot"></span>REC</div>
+      <div class="channel"></div>
+    </div>
+    <div class="place"></div>
+    <div class="timecode">00:00:00:00</div>
+
+    <div class="props"></div>
+    <div class="cast"></div>
+    <div class="bubble-layer"></div>
+
+    <div class="title-card"><div class="tc-kicker"></div><div class="tc-title"></div></div>
+  </div>
+
+  <div class="lower">
+    <div class="narr-channel"></div>
+    <div class="narr"></div>
+    <button id="weiter">Weiter <span>▸</span></button>
+  </div>
+`;
+
+const elScreen   = root.querySelector("#screen");
+const elChannel  = root.querySelector(".channel");
+const elPlace    = root.querySelector(".place");
+const elRec      = root.querySelector(".rec");
+const elTC       = root.querySelector(".timecode");
+const elProps    = root.querySelector(".props");
+const elCast     = root.querySelector(".cast");
+const elBubble   = root.querySelector(".bubble-layer");
+const elTitle    = root.querySelector(".title-card");
+const elTCKick   = root.querySelector(".tc-kicker");
+const elTCTitle  = root.querySelector(".tc-title");
+const elNarr     = root.querySelector(".narr");
+const elNarrCh   = root.querySelector(".narr-channel");
+const elWeiter   = root.querySelector("#weiter");
+
+const POS = {
+  0: [], 1: [[50, 62]], 2: [[30, 62], [70, 62]], 3: [[22, 62], [50, 60], [78, 62]],
+  4: [[17, 58], [39, 66], [61, 66], [83, 58]],
+  5: [[13, 58], [32, 66], [50, 54], [68, 66], [87, 58]]
+};
+const PROP_POS = [[20, 26], [78, 22], [62, 40], [33, 44], [50, 18], [86, 50]];
+
+/* ============================================================
+   Rendering
+   ============================================================ */
+let lastCastKey = "", lastPropKey = "", lastTheme = "";
+
+function setTheme(t) {
+  const key = t.bg1 + t.bg2 + t.accent;
+  if (key === lastTheme) return;
+  lastTheme = key;
+  document.body.style.setProperty("--bg1", t.bg1);
+  document.body.style.setProperty("--bg2", t.bg2);
+  document.body.style.setProperty("--accent", t.accent);
 }
 
-// rough spoken duration estimate (ms) — used as fallback pacing
-function estimate(text) {
-  const words = text.trim().split(/\s+/).length;
-  return Math.max(2200, (words / (2.6 * CONFIG.rate)) * 1000 + 550);
+function renderStage(stage, speaker) {
+  const castKey = stage.chars.join(",");
+  if (castKey !== lastCastKey) {
+    lastCastKey = castKey;
+    const pos = POS[stage.chars.length] || POS[5];
+    elCast.innerHTML = stage.chars.map((id, k) => {
+      const c = CHARACTERS[id];
+      const [x, y] = pos[k] || [50, 60];
+      return `<div class="actor" data-id="${id}" style="left:${x}%;top:${y}%;--c:${c.color}">
+                <div class="emoji">${c.emoji}</div>
+                <div class="nametag">${c.name}</div>
+              </div>`;
+    }).join("");
+  }
+  // highlight speaker
+  elCast.querySelectorAll(".actor").forEach(a =>
+    a.classList.toggle("speaking", a.dataset.id === speaker));
+
+  const propKey = JSON.stringify(stage.props || []);
+  if (propKey !== lastPropKey) {
+    lastPropKey = propKey;
+    elProps.innerHTML = (stage.props || []).map((p, k) => {
+      const [x, y] = PROP_POS[k] || [50, 30];
+      return `<div class="prop" style="left:${x}%;top:${y}%;animation-delay:${k * 0.7}s">${p.e}</div>`;
+    }).join("");
+  }
+}
+
+/* typewriter — returns a function to finish instantly */
+function typeText(el, text, durationMs) {
+  el.innerHTML = "";
+  const span = document.createElement("span");
+  const caret = document.createElement("i");
+  caret.className = "caret";
+  el.appendChild(span); el.appendChild(caret);
+  const chars = [...text];
+  const step = Math.max(CFG.typeMin, durationMs / Math.max(1, chars.length));
+  let n = 0, timer = null;
+  function tick() {
+    n++;
+    span.textContent = text.slice(0, n);
+    if (n < chars.length) timer = setTimeout(tick, step);
+    else caret.classList.add("done");
+  }
+  timer = setTimeout(tick, step);
+  return function finish() {
+    if (timer) clearTimeout(timer);
+    span.textContent = text;
+    caret.classList.add("done");
+  };
 }
 
 /* ============================================================
-   Player engine
+   Audio (3 Stufen: Datei → Browserstimme → still)
    ============================================================ */
-let cur = -1;            // current step index
-let token = 0;           // guards against stale onend/timers
-let timer = null;        // fallback / safety timer
-let paused = false;
-let started = false;
-let endTimer = null;
+let voiceMode = "speech";     // wird beim Start gesetzt: 'file' | 'speech' | 'silent'
+let fileIds = new Set();
+const synth = window.speechSynthesis;
+let synthVoices = [];
+function loadVoices() { synthVoices = synth ? synth.getVoices() : []; }
+if (synth) { loadVoices(); synth.onvoiceschanged = loadVoices; }
 
-const captionBox = document.getElementById("captionText");
-const progressFill = document.getElementById("progressFill");
-const controls = document.getElementById("controls");
-
-function clearTimers() { if (timer) { clearTimeout(timer); timer = null; } }
-
-function setActiveScene(si) {
-  SCENES.forEach((sc, i) => sc._el.classList.toggle("active", i === si));
-  // adjust background
-  const sc = SCENES[si];
-  document.body.style.setProperty("--bg1", sc.bg[0]);
-  document.body.style.setProperty("--bg2", sc.bg[1]);
-  document.getElementById("stage").style.background =
-    `radial-gradient(130% 100% at 50% 0%, ${sc.bg[1]} 0%, ${sc.bg[0]} 60%, #05070f 100%)`;
+function pickSpeechVoice(c) {
+  const de = synthVoices.filter(v => /^de/i.test(v.lang));
+  if (!de.length) return null;
+  if (c.voice) {
+    const base = c.voice.replace(/\s*\(.*$/, "").trim();
+    const hit = de.find(v => v.name.toLowerCase().includes(base.toLowerCase()));
+    if (hit) return hit;
+  }
+  return de.find(v => /google/i.test(v.name)) || de[0];
 }
 
-function revealUpTo(si, li) {
-  SCENES[si]._el.querySelectorAll(".reveal").forEach(el => {
-    const need = parseInt(el.dataset.step || "0", 10);
-    el.classList.toggle("in", li >= need);
-  });
+async function detectVoiceFiles() {
+  try {
+    const r = await fetch("assets/voice/manifest.json", { cache: "no-store" });
+    if (!r.ok) return false;
+    const m = await r.json();
+    fileIds = new Set(m.ids || []);
+    return fileIds.size > 0;
+  } catch (e) { return false; }
 }
 
-function showCaption(text) {
-  captionBox.classList.remove("show");
-  // small delay for the fade
-  requestAnimationFrame(() => {
-    captionBox.textContent = text;
-    requestAnimationFrame(() => captionBox.classList.add("show"));
-  });
+/* current playback handle */
+let curAudio = null;
+
+function estimate(text) {
+  return Math.max(1900, (text.length / 14) * 1000 + 500);
 }
 
-function setProgress() {
-  progressFill.style.width = ((cur + 1) / steps.length) * 100 + "%";
+/* ============================================================
+   Engine / Transport
+   ============================================================ */
+let idx = -1, paused = false, started = false, token = 0, gapTimer = null;
+const elProgressActs = [];
+
+function clearGap() { if (gapTimer) { clearTimeout(gapTimer); gapTimer = null; } }
+function stopAudio() {
+  clearGap();
+  if (curAudio) { try { curAudio.onended = null; curAudio.pause(); } catch (e) {} curAudio = null; }
+  try { synth && synth.cancel(); } catch (e) {}
 }
 
-function playStep(i) {
-  clearTimers();
-  if (i >= steps.length) return finish();
+function showTitleCard(beat) {
+  elTCKick.textContent = beat.act;
+  elTCTitle.textContent = beat.title;
+  elTitle.classList.add("show");
+  setTimeout(() => elTitle.classList.remove("show"), 2600);
+}
+
+function playBeat(i) {
+  stopAudio();
+  if (i >= beats.length) return finish();
   if (i < 0) i = 0;
-  cur = i;
-  const step = steps[i];
-  const prevSi = i > 0 ? steps[i - 1].si : -1;
+  idx = i;
+  const beat = beats[i];
+  const c = CHARACTERS[beat.who] || CHARACTERS.narrator;
+  const isNarr = c.kind === "narrator" || c.kind === "system";
 
-  if (step.si !== prevSi || !started) setActiveScene(step.si);
-  revealUpTo(step.si, step.li);
-  showCaption(step.text);
+  setTheme(beat.theme);
+  elChannel.textContent = beat.act;
+  elNarrCh.textContent = beat.act;
+  elPlace.textContent = beat.stage.place || "";
+  elRec.style.display = beat.rec ? "" : "none";
+  if (beat.title) showTitleCard(beat);
+
+  renderStage(beat.stage, isNarr ? null : beat.who);
   setProgress();
 
   const myToken = ++token;
-  const advance = () => { if (myToken === token && !paused) playStep(cur + 1); };
+  const advance = () => {
+    if (myToken !== token || paused) return;
+    clearGap();
+    gapTimer = setTimeout(() => { if (myToken === token && !paused && started) playBeat(idx + 1); }, CFG.gapAfter);
+  };
 
-  const canSpeak = synth && voice && !muted;
-  if (canSpeak) {
-    try { synth.cancel(); } catch (e) {}
-    const u = new SpeechSynthesisUtterance(step.text);
-    u.voice = voice; u.lang = CONFIG.lang;
-    u.rate = CONFIG.rate; u.pitch = CONFIG.pitch; u.volume = 1;
-    u.onend = advance;
-    u.onerror = () => { /* fall back to timer below */ };
-    // safety net in case onend never fires (Chrome long-utterance bug, stalls)
-    timer = setTimeout(advance, estimate(step.text) * 2.4 + 4000);
-    try { synth.speak(u); } catch (e) { clearTimers(); timer = setTimeout(advance, estimate(step.text)); }
+  // ---- render text (bubble vs. narrator lower-third) ----
+  let typeTarget, finishType;
+  if (isNarr) {
+    elBubble.innerHTML = "";
+    elNarr.className = "narr show" + (c.kind === "system" ? " credits" : "");
+    elNarr.innerHTML = (c.kind === "system")
+      ? beat.text.split("\n").map((l, k) => `<div class="cl cl${k}">${l}</div>`).join("")
+      : "";
+    typeTarget = elNarr;
   } else {
-    // no voice / muted → silent film pacing
-    timer = setTimeout(advance, estimate(step.text));
+    elNarr.className = "narr";
+    elNarr.innerHTML = "";
+    const x = bubbleXFor(beat);
+    elBubble.innerHTML = `<div class="bubble" style="left:${x}%;--c:${c.color}">
+        <div class="who">${c.name}</div><div class="say"></div></div>`;
+    typeTarget = elBubble.querySelector(".say");
   }
+
+  // ---- audio ----
+  const useFile = (voiceMode === "file") && fileIds.has(i) && !isSystem(beat);
+  const useSpeech = (voiceMode === "speech") && !isSystem(beat) && synth;
+
+  if (c.kind === "system") {
+    // credits: no typewriter, just fade in
+    if (typeTarget === elNarr) {/* already set */}
+    finishType = () => {};
+    duck(false);
+    gapTimerStartFor(estimate(beat.text) * 1.4, myToken, advance);
+    return;
+  }
+
+  if (useFile) {
+    const a = new Audio(`assets/voice/${i}.m4a`);
+    curAudio = a;
+    duck(true);
+    let typed = false;
+    const startType = (durMs) => { if (typed) return; typed = true; finishType = typeText(typeTarget, beat.text, durMs); };
+    a.addEventListener("loadedmetadata", () => {
+      const d = (a.duration && isFinite(a.duration)) ? a.duration * 1000 : estimate(beat.text);
+      startType(Math.max(900, d * 0.82));
+    });
+    a.addEventListener("ended", () => { duck(false); advance(); });
+    a.addEventListener("error", () => { startType(estimate(beat.text)); gapTimerStartFor(estimate(beat.text), myToken, advance); });
+    a.play().catch(() => { startType(estimate(beat.text)); gapTimerStartFor(estimate(beat.text), myToken, advance); });
+    // safety: if metadata slow, start typing anyway
+    setTimeout(() => startType(estimate(beat.text)), 350);
+  } else if (useSpeech) {
+    finishType = typeText(typeTarget, beat.text, estimate(beat.text));
+    const u = new SpeechSynthesisUtterance(beat.text);
+    const v = pickSpeechVoice(c); if (v) u.voice = v;
+    u.lang = "de-DE"; u.rate = (c.rate || 1) * CFG.speechRate; u.pitch = c.pitch || 1;
+    u.onend = advance;
+    u.onerror = () => gapTimerStartFor(estimate(beat.text), myToken, advance);
+    try { synth.cancel(); synth.speak(u); } catch (e) { gapTimerStartFor(estimate(beat.text), myToken, advance); }
+  } else {
+    finishType = typeText(typeTarget, beat.text, estimate(beat.text));
+    gapTimerStartFor(estimate(beat.text), myToken, advance);
+  }
+
+  // expose finisher for manual skip
+  playBeat._finish = () => finishType && finishType();
+}
+
+function isSystem(beat) { return (CHARACTERS[beat.who] || {}).kind === "system"; }
+
+function gapTimerStartFor(ms, myToken, advance) {
+  clearGap();
+  gapTimer = setTimeout(() => { if (myToken === token && !paused) advance(); }, ms);
+}
+
+function bubbleXFor(beat) {
+  // place bubble horizontally over the speaker, clamped
+  const pos = POS[beat.stage.chars.length] || POS[5];
+  const k = beat.stage.chars.indexOf(beat.who);
+  let x = (pos[k] && pos[k][0]) || 50;
+  return Math.max(26, Math.min(74, x));
+}
+
+/* music ducking */
+const music = document.getElementById("music");
+let musicOK = false;
+function duck(on) {
+  if (!musicOK) return;
+  const target = on ? CFG.musicVol * 0.55 : CFG.musicVol;
+  try { music.volume = target; } catch (e) {}
 }
 
 function finish() {
-  clearTimers();
-  try { synth && synth.cancel(); } catch (e) {}
-  captionBox.classList.remove("show");
-  progressFill.style.width = "100%";
-  setTimeout(() => { document.getElementById("end").hidden = false; }, 700);
+  stopAudio();
+  setProgress(true);
+  elRec.classList.add("stopped");
+  if (musicOK) fadeMusic(0, 1500);
+  document.getElementById("end").hidden = false;
 }
 
-/* ----- transport ----- */
-function nextScene() {
-  const si = steps[cur] ? steps[cur].si : 0;
-  // jump to first step of next scene
-  let i = cur + 1;
-  while (i < steps.length && steps[i].si === si) i++;
-  playStep(Math.min(i, steps.length));
-}
-function prevScene() {
-  const si = steps[cur] ? steps[cur].si : 0;
-  // first step of current scene, or previous scene if already at start
-  let firstOfCur = cur;
-  while (firstOfCur > 0 && steps[firstOfCur - 1].si === si) firstOfCur--;
-  if (cur === firstOfCur && firstOfCur > 0) {
-    const prevSi = steps[firstOfCur - 1].si;
-    let j = firstOfCur - 1;
-    while (j > 0 && steps[j - 1].si === prevSi) j--;
-    playStep(j);
-  } else {
-    playStep(firstOfCur);
-  }
-}
+function next() { stopAudio(); paused = false; document.body.classList.remove("paused"); playBeat(idx + 1); }
+function prev() { stopAudio(); paused = false; document.body.classList.remove("paused"); playBeat(Math.max(0, idx - 1)); }
 
 function togglePause() {
   if (!started) return;
@@ -474,28 +342,106 @@ function togglePause() {
   document.body.classList.toggle("paused", paused);
   document.getElementById("btnPause").textContent = paused ? "▶" : "⏸";
   if (paused) {
-    clearTimers();
-    try { synth && synth.pause(); } catch (e) {}
+    clearGap();
+    if (curAudio) { try { curAudio.pause(); } catch (e) {} }
+    try { synth && synth.paused === false && synth.pause(); } catch (e) {}
+    stopTimecode();
   } else {
-    if (synth && voice && !muted && synth.paused) {
-      try { synth.resume(); } catch (e) {}
-      // re-arm safety timer
-      const myToken = token;
-      timer = setTimeout(() => { if (myToken === token && !paused) playStep(cur + 1); },
-        estimate(steps[cur].text) * 2.4 + 4000);
-    } else {
-      playStep(cur); // restart current step pacing
-    }
+    if (curAudio) { curAudio.play().catch(() => {}); }
+    else if (synth && synth.paused) { try { synth.resume(); } catch (e) {} }
+    else playBeat(idx);   // restart timer-based beat
+    startTimecode();
   }
 }
 
-function toggleMute() {
-  muted = !muted;
-  document.getElementById("btnMute").textContent = muted ? "🔇" : "🔊";
-  const music = document.getElementById("music");
-  if (muted) { try { synth && synth.cancel(); } catch (e) {} if (music) music.muted = true; }
-  else if (music) music.muted = false;
-  if (started && !paused) playStep(cur); // re-pace current step in the new mode
+/* ============================================================
+   Progress dots (per act)
+   ============================================================ */
+const elProg = document.getElementById("progress");
+(function buildProgress() {
+  let acts = [], cur = null;
+  beats.forEach(b => { if (b.act !== cur) { cur = b.act; acts.push(b.act); } });
+  // we only have one channel string; use act labels instead
+})();
+function setProgress(done) {
+  const pct = done ? 100 : (idx + 1) / beats.length * 100;
+  elProg.style.width = pct + "%";
+}
+
+/* ============================================================
+   Timecode
+   ============================================================ */
+let tcBase = 14 * 60 + 22, tcStart = 0, tcRAF = null, tcPausedAcc = 0, tcPauseT = 0;
+function fmtTC(sec) {
+  const f = Math.floor((sec % 1) * 25);
+  const s = Math.floor(sec) % 60, m = Math.floor(sec / 60) % 60, h = Math.floor(sec / 3600);
+  const p = n => String(n).padStart(2, "0");
+  return `${p(h)}:${p(m)}:${p(s)}:${p(f)}`;
+}
+function tickTC() {
+  const t = tcBase + (performance.now() - tcStart - tcPausedAcc) / 1000;
+  elTC.textContent = fmtTC(t);
+  tcRAF = requestAnimationFrame(tickTC);
+}
+function startTimecode() {
+  if (tcPauseT) { tcPausedAcc += performance.now() - tcPauseT; tcPauseT = 0; }
+  if (!tcStart) tcStart = performance.now();
+  if (!tcRAF) tcRAF = requestAnimationFrame(tickTC);
+}
+function stopTimecode() { if (tcRAF) { cancelAnimationFrame(tcRAF); tcRAF = null; } tcPauseT = performance.now(); }
+
+/* ============================================================
+   Music helpers
+   ============================================================ */
+function fadeMusic(to, ms) {
+  const from = music.volume, steps = Math.max(1, Math.round(ms / 40)); let n = 0;
+  const iv = setInterval(() => {
+    n++; music.volume = Math.max(0, Math.min(1, from + (to - from) * (n / steps)));
+    if (n >= steps) clearInterval(iv);
+  }, 40);
+}
+
+/* ============================================================
+   Start / controls
+   ============================================================ */
+async function start() {
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("end").hidden = true;
+  document.getElementById("controls").hidden = false;
+  started = true; paused = false;
+
+  // voice mode
+  if (window._forceSilent) voiceMode = "silent";
+  else voiceMode = (await detectVoiceFiles()) ? "file" : (synth ? "speech" : "silent");
+  updateVoiceBtn();
+
+  // music: fire-and-forget (darf den Start nie blockieren)
+  try {
+    music.volume = 0;
+    music.play().then(() => { musicOK = true; fadeMusic(CFG.musicVol, 1200); }).catch(() => { musicOK = false; });
+  } catch (e) { musicOK = false; }
+  // unlock speech on iOS within gesture
+  if (voiceMode === "speech") { try { synth.cancel(); } catch (e) {} }
+
+  startTimecode();
+  playBeat(0);
+}
+
+function updateVoiceBtn() {
+  const b = document.getElementById("btnVoice");
+  if (!b) return;
+  b.textContent = voiceMode === "silent" ? "🔇" : (voiceMode === "file" ? "🎙️" : "🗣️");
+  b.title = voiceMode === "silent" ? "Stimmen aus (Untertitel + Musik)" :
+            voiceMode === "file" ? "Studio-Stimmen (gerendert)" : "Browserstimmen";
+}
+function cycleVoice() {
+  const order = ["file", "speech", "silent"];
+  // only offer 'file' if available
+  const avail = fileIds.size ? order : ["speech", "silent"];
+  let k = avail.indexOf(voiceMode); k = (k + 1) % avail.length;
+  voiceMode = avail[k];
+  updateVoiceBtn();
+  if (started && !paused) { stopAudio(); playBeat(idx); }
 }
 
 function toggleFs() {
@@ -503,47 +449,29 @@ function toggleFs() {
   else document.exitFullscreen?.();
 }
 
-/* ----- start / replay ----- */
-function startStory() {
-  document.getElementById("start").style.display = "none";
-  document.getElementById("end").hidden = true;
-  controls.hidden = false;
-  started = true; paused = false; muted = false;
-  document.body.classList.remove("paused");
-  document.getElementById("btnPause").textContent = "⏸";
-
-  // optional background music
-  const music = document.getElementById("music");
-  if (music) { music.volume = 0.16; music.play().catch(() => {}); }
-
-  // warn if no TTS voice is available
-  if (!synth || !voice) {
-    document.getElementById("ttsWarn") && (document.getElementById("ttsWarn").hidden = false);
-  }
-  playStep(0);
-}
-
-document.getElementById("startBtn").addEventListener("click", startStory);
-document.getElementById("replayBtn").addEventListener("click", () => { startStory(); });
-document.getElementById("btnPrev").addEventListener("click", () => { paused = false; document.body.classList.remove("paused"); document.getElementById("btnPause").textContent = "⏸"; prevScene(); });
-document.getElementById("btnNext").addEventListener("click", () => { paused = false; document.body.classList.remove("paused"); document.getElementById("btnPause").textContent = "⏸"; nextScene(); });
+document.getElementById("startBtn").addEventListener("click", start);
+document.getElementById("replayBtn").addEventListener("click", () => { tcStart = 0; tcPausedAcc = 0; start(); });
+elWeiter.addEventListener("click", () => {
+  // first click finishes typing, else advances
+  if (playBeat._finish && document.querySelector(".caret:not(.done)")) playBeat._finish();
+  else next();
+});
+document.getElementById("btnNext").addEventListener("click", next);
+document.getElementById("btnPrev").addEventListener("click", prev);
 document.getElementById("btnPause").addEventListener("click", togglePause);
-document.getElementById("btnMute").addEventListener("click", toggleMute);
+document.getElementById("btnVoice").addEventListener("click", cycleVoice);
 document.getElementById("btnFs").addEventListener("click", toggleFs);
 
 window.addEventListener("keydown", e => {
-  if (!started) { if (e.code === "Space" || e.code === "Enter") { e.preventDefault(); startStory(); } return; }
+  if (!started) { if (e.code === "Space" || e.code === "Enter") { e.preventDefault(); start(); } return; }
   if (e.code === "Space") { e.preventDefault(); togglePause(); }
-  else if (e.code === "ArrowRight") { e.preventDefault(); paused = false; document.body.classList.remove("paused"); document.getElementById("btnPause").textContent = "⏸"; nextScene(); }
-  else if (e.code === "ArrowLeft") { e.preventDefault(); paused = false; document.body.classList.remove("paused"); document.getElementById("btnPause").textContent = "⏸"; prevScene(); }
-  else if (e.key === "f" || e.key === "F") toggleFs();
-  else if (e.key === "m" || e.key === "M") toggleMute();
-  else if (e.key === "r" || e.key === "R") startStory();
+  else if (e.code === "ArrowRight" || e.code === "Enter") { e.preventDefault(); next(); }
+  else if (e.code === "ArrowLeft") { e.preventDefault(); prev(); }
+  else if (e.key.toLowerCase() === "f") toggleFs();
+  else if (e.key.toLowerCase() === "v") cycleVoice();
+  else if (e.key.toLowerCase() === "r") { tcStart = 0; tcPausedAcc = 0; start(); }
 });
-
-// Chrome safety: cancel speech on unload so it doesn't keep talking
 window.addEventListener("beforeunload", () => { try { synth && synth.cancel(); } catch (e) {} });
 
-// log estimated total runtime to the console for tuning
-console.log(`Agile-Story · ${steps.length} Schritte · geschätzte Laufzeit ≈ ` +
-  Math.round(steps.reduce((s, st) => s + estimate(st.text), 0) / 1000) + "s");
+console.log(`Akte Agile · ${beats.length} Beats · grobe Laufzeit ≈ ` +
+  Math.round(beats.reduce((s, b) => s + estimate(b.text) + CFG.gapAfter, 0) / 1000) + "s (Schätzung ohne Audio)");

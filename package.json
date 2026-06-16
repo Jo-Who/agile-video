@@ -1,0 +1,10 @@
+{
+  "name": "agile-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DIE AKTE AGILE — cinematische Mini-Doku über Agilität im Studium und Job (Gruppe D)",
+  "scripts": {
+    "voices": "node tools/gen-voices.js",
+    "serve": "python3 -m http.server 4321"
+  }
+}

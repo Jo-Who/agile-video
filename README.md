@@ -1,78 +1,91 @@
-# Agile im Studium & Job — eine animierte Story 🎬⚡
+# DIE AKTE AGILE 🎬
 
-Eine **5–8-minütige animierte Web-Story** zum Thema:
+Eine **cinematische Mini-Doku** (5–8 Min) zum Thema:
 *„Wo seht ihr konkrete Einsatzmöglichkeiten von Agile im Studium und im Job?“*
 
-Statt eines klassischen Videos läuft hier eine vertonte Animation im Browser:
-**KI-Voiceover** (Sprachsynthese des Browsers) + animierte Emoji-Szenen + Untertitel.
-→ Keine persönlichen Aufnahmen, keine Persönlichkeitsrechte verletzt. ✅
+Im Stil einer Reportage („DOK · Gruppe D"): Letterbox-Balken, **REC**-Anzeige, laufender
+Timecode, Film-Grain — Emoji-Figuren mit **Sprechblasen & Namen**, Text der sich **tippt**,
+**verschiedene KI-Stimmen pro Figur** und dramatische Musik.
 
-**Funktioniert auf PC und Handy.** Einfach den Link teilen — oder als Video aufnehmen.
+Die Story: Vier Studierende (Jonas, David, Inas, Marianne) machen Projektarbeit erst
+**klassisch** (Chaos, alles am Ende) — bis **Dozentin Z. M.** ihnen im Agile-Modul zeigt,
+wie es anders geht. Danach: agil im **Studium** und im **Job**.
+
+→ Keine persönlichen Aufnahmen (KI-Stimmen). Läuft auf **PC & Handy**. Einfach Link teilen.
 
 ---
 
 ## ▶️ Anschauen
-
-1. `index.html` im Browser öffnen (Chrome/Edge/Safari) **oder** den GitHub-Pages-Link.
-2. Auf **„Story starten“** klicken (Klick ist nötig, damit Ton & Stimme erlaubt sind).
-3. Läuft automatisch durch. Steuerung unten rechts oder per Tastatur:
-   - `Leertaste` Pause/Play · `→`/`←` Szene wechseln · `F` Vollbild · `M` Ton · `R` neu starten
-
-> 💡 **Beste Stimme:** In **Google Chrome** auf dem Mac/PC gibt es sehr natürliche deutsche
-> Stimmen ("Google Deutsch"). Über das Dropdown unten rechts lässt sich die Stimme wählen.
+`index.html` im Browser öffnen (am besten **Chrome/Safari**) → **„Reportage starten"** → läuft
+automatisch durch. Steuerung unten rechts oder per Tastatur:
+`Leertaste` Pause · `→/←` Beat wechseln · `V` Stimmen-Modus · `F` Vollbild · `R` neu.
+**„Weiter ▸"** überspringt zum nächsten Beat (1. Klick: Tippanimation überspringen).
 
 ---
 
-## 🌐 Online stellen (GitHub Pages) — so kriegt ihr den Link
+## 🎙️ Die Stimmen (wichtig!)
 
-1. Repo auf GitHub pushen.
-2. **Settings → Pages → Source: `main` / root** auswählen, speichern.
-3. Nach ~1 Min ist die Story unter `https://<user>.github.io/agile-video/` live.
+Die Figuren-Stimmen sind **vorgerenderte Audiodateien** in `assets/voice/` – sie sind schon
+dabei und funktionieren überall (auch nach dem Vercel-Deploy), ohne dass etwas installiert
+werden muss.
 
----
+Erzeugt wurden sie auf einem **Mac** mit den eingebauten Stimmen (`say`):
 
-## 🎥 Als Video abgeben (falls eine Datei verlangt wird)
+| Figur | Stimme (macOS) |
+|------|----------------|
+| Reportage (Erzähler) | Reed |
+| Jonas | Eddy |
+| David | Rocko |
+| Inas | Sandy |
+| Marianne | Shelley |
+| Dozentin Z. M. | Anna |
+| Der Chef | Grandpa |
 
-Bildschirmaufnahme **mit Systemton**:
-- **macOS:** `⌘ + Shift + 5` → Aufnahme. Für den Ton der Stimme braucht es ggf.
-  ein Tool wie *BlackHole* oder einfach **QuickTime → Neue Bildschirmaufnahme** mit
-  ausgewähltem Mikrofon/Systemaudio. Tipp: Vollbild (`F`), dann `Story starten`.
-- Alternativ **OBS Studio** (gratis): "Bildschirm aufnehmen" + "Desktop-Audio".
+**Neu rendern** (nach Textänderungen, nur auf macOS):
+```bash
+npm run voices
+```
+Für beste Qualität die deutschen Premium-Stimmen laden:
+*Systemeinstellungen → Bedienungshilfen → Gesprochene Inhalte → Systemstimme → Anpassen … →
+Deutsch* (Eddy, Rocko, Sandy, Shelley, Reed, Grandpa, Anna).
 
-Danach läuft alles automatisch von Anfang bis Ende durch — einfach aufnehmen.
-
----
-
-## ✏️ Inhalte anpassen
-
-Alles steckt in **`app.js`** ganz oben:
-
-- `CONFIG.authors` → eure Namen für das Outro.
-- `CONFIG.rate` → Sprechtempo. **Kleiner = langsamer = längeres Video** (z.B. `0.9`).
-- `SCENES[]` → Text & Animation jeder Szene. `lines[]` sind die gesprochenen Sätze
-  (gleichzeitig Untertitel). Elemente mit `data-step="N"` erscheinen, sobald Satz N
-  gesprochen wird.
-
-Die geschätzte Laufzeit wird beim Start in die **Browser-Konsole** geschrieben.
-
-### Optional: Hintergrundmusik
-Eine dezente Loop-Datei als `assets/music.mp3` ablegen — wird automatisch leise abgespielt
-(z.B. lizenzfreie Musik von Pixabay/Incompetech).
-
-### Optional: eigene Studio-Stimme statt Browser-TTS
-Wer höhere Sprachqualität will, kann pro Szene fertige Audiodateien (z.B. aus ElevenLabs)
-einsetzen. Die Engine ist dafür vorbereitet — Audio statt `SpeechSynthesisUtterance`
-abspielen und beim `ended`-Event weiterschalten. (Standard ist die eingebaute KI-Stimme,
-damit nichts Externes nötig ist.)
+**Stimmen-Modus** im Player (Knopf 🎙️ / Taste `V`) schaltet um zwischen:
+🎙️ gerenderte Studio-Stimmen · 🗣️ Live-Browserstimmen · 🔇 nur Untertitel + Musik.
 
 ---
 
-## 🧩 Aufbau
+## 🎵 Musik
+Eine dramatische, lizenzfreie Loop als **`assets/music.mp3`** ablegen → wird automatisch leise
+unterlegt und am Ende ausgeblendet. Quellen z.B. **Pixabay Music** oder **Uppbeat**
+(Suchbegriffe: *cinematic documentary, suspense, tension, dramatic underscore*). Ohne Datei
+läuft alles normal, nur ohne Musik.
+
+---
+
+## ☁️ Deployen (Vercel)
+Vercel → **Add New → Project** → Repo `agile-video` importieren → Framework **„Other"**,
+Build Command **leer**, Output **Root** → Deploy. Statische Seite, läuft sofort.
+(Geht genauso über GitHub Pages: Settings → Pages → `main` / root.)
+
+## 🎥 Als Videodatei abgeben
+Vollbild (`F`) → Bildschirmaufnahme **mit Ton** (macOS `⌘⇧5` oder OBS „Desktop-Audio") →
+„Reportage starten" → läuft automatisch durch.
+
+---
+
+## ✏️ Anpassen
+Alles Inhaltliche steht in **`story.js`**:
+- `CHARACTERS` — Figuren, Emojis, Farben, Stimmen.
+- `SCRIPT` — die Beats (`who` = Figur, `text` = gesprochene Zeile). `stage` setzt die Bühne
+  (anwesende Figuren, Hintergrund-Emojis, Ortsmarke), `theme` die Farben, `label`/`title`
+  die Einblendungen.
+
+Nach Textänderungen Stimmen mit `npm run voices` neu erzeugen. Tempo/Pausen in `app.js` → `CFG`.
 
 | Datei | Inhalt |
 |------|--------|
 | `index.html` | Grundgerüst, Overlays, Steuerung |
-| `styles.css` | Design & alle Animationen |
-| `app.js` | Drehbuch (`SCENES`) + Player-Engine + KI-Voiceover |
-
-Keine Build-Tools, keine Abhängigkeiten — reines HTML/CSS/JS.
+| `styles.css` | cinematisches Design & Animationen |
+| `story.js` | Besetzung + Drehbuch (auch vom Stimmen-Generator gelesen) |
+| `app.js` | Engine: Bühne, Sprechblasen, Tippanimation, Audio, Timecode |
+| `tools/gen-voices.js` | rendert die Figuren-Stimmen (macOS) |
